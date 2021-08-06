@@ -1,7 +1,7 @@
 from .voc0712 import VOCDetection, VOCAnnotationTransform, VOC_CLASSES, VOC_ROOT
 # from .cocodataset import coco_class_index, coco_class_labels, COCODataset, coco_root
 from .config import *
-import torch
+import paddle
 import cv2
 import numpy as np
 
@@ -22,8 +22,8 @@ def detection_collate(batch):
     imgs = []
     for sample in batch:
         imgs.append(sample[0])
-        targets.append(torch.FloatTensor(sample[1]))
-    return torch.stack(imgs, 0), targets
+        targets.append(paddle.to_tensor(sample[1]))
+    return paddle.stack(imgs, 0), targets
 
 
 def base_transform(image, size, mean, std):
