@@ -1,4 +1,4 @@
-# yolov1-paddlepaddle
+# YOLOv1-PaddlePaddle
 
 
 # Network
