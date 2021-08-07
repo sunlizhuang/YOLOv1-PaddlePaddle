@@ -20,13 +20,6 @@ Environment:
 - Python3.6, opencv-python, PaddlePaddle 2.1.0
 
 
-VOC:
-<table><tbody>
-<tr><th align="left" bgcolor=#f8f8f8> </th>     <td bgcolor=white> size </td><td bgcolor=white> mAP </td><td bgcolor=white> FPS </td></tr>
-<tr><th align="left" bgcolor=#f8f8f8> VOC07 test</th><td bgcolor=white> 320 </td><td bgcolor=white> 64.4 </td><td bgcolor=white> - </td></tr>
-<tr><th align="left" bgcolor=#f8f8f8> VOC07 test</th><td bgcolor=white> 416 </td><td bgcolor=white> 68.5 </td><td bgcolor=white> - </td></tr>
-<tr><th align="left" bgcolor=#f8f8f8> VOC07 test</th><td bgcolor=white> 608 </td><td bgcolor=white> 71.5 </td><td bgcolor=white> - </td></tr>
-</table></tbody>
 
 
 
@@ -50,19 +43,18 @@ sh data/scripts/VOC2012.sh # <directory>
 
 # Train
 ```Shell
-python train.py -d voc --cuda -v [select a model] -ms
+python train.py
 ```
 
-You can run ```python train.py -h``` to check all optional argument.
 
 ## Test
 ```Shell
-python test.py -d voc --cuda -v [select a model] --trained_model [ Please input the path to model dir. ]
+python test.py
 ```
 
 ## Evaluation
 ```Shell
-python eval.py -d voc --cuda -v [select a model] --train_model [ Please input the path to model dir. ]
+python eval.py
 ```
 
 
