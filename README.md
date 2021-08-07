@@ -43,19 +43,19 @@ sh data/scripts/VOC2012.sh # <directory>
 
 # Train
 ```Shell
-python train.py -d voc --cuda -v [select a model] -ms
+python train.py
 ```
 
 You can run ```python train.py -h``` to check all optional argument.
 
 ## Test
 ```Shell
-python test.py -d voc --cuda -v [select a model] --trained_model [ Please input the path to model dir. ]
+python test.py
 ```
 
 ## Evaluation
 ```Shell
-python eval.py -d voc --cuda -v [select a model] --train_model [ Please input the path to model dir. ]
+python eval.py
 ```
 
 
