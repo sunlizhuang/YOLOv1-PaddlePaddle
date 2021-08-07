@@ -23,8 +23,7 @@ Environment:
 <table><tbody>
 <tr><th align="left" bgcolor=#f8f8f8> </th>     <td bgcolor=white> size </td><td bgcolor=white> mAP </td></tr>
 <tr><th align="left" bgcolor=#f8f8f8> VOC2007 test</th><td bgcolor=white> 320 </td><td bgcolor=white> 63.4 </td></tr>
-<tr><th align="left" bgcolor=#f8f8f8> VOC2007 test</th><td bgcolor=white> 416 </td><td bgcolor=white> 68.5 </td></tr>
-<tr><th align="left" bgcolor=#f8f8f8> VOC2007 test</th><td bgcolor=white> 608 </td><td bgcolor=white> 71.5 </td></tr>
+<tr><th align="left" bgcolor=#f8f8f8> VOC2007 test</th><td bgcolor=white> 416 </td><td bgcolor=white> 68.6 </td></tr>
 </table></tbody>
 
 
