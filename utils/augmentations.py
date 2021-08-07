@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import types
 from numpy import random
-
+paddle.disable_static()
 
 def intersect(box_a, box_b):
     max_xy = np.minimum(box_a[:, 2:], box_b[2:])

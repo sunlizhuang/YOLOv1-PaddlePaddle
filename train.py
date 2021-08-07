@@ -8,10 +8,11 @@ import numpy as np
 
 import paddle
 import paddle.optimizer as optim
-
+paddle.disable_static()
 from data import *
 import tools
-
+# import paddlex
+# from paddlex.det import transforms
 from utils.augmentations import SSDAugmentation
 from utils.vocapi_evaluator import VOCAPIEvaluator
 
@@ -100,6 +101,31 @@ def train():
     if args.dataset == 'voc':
         data_dir = VOC_ROOT
         num_classes = 20
+        # train_transforms = transforms.Compose([
+        #     transforms.RandomHorizontalFlip(),
+        #     transforms.Normalize(),
+        #     transforms.ResizeByShort(short_size=800, max_size=1333),
+        #     transforms.Padding(coarsest_stride=32)
+        # ])
+        #
+        # eval_transforms = transforms.Compose([
+        #     transforms.Normalize(),
+        #     transforms.ResizeByShort(short_size=800, max_size=1333),
+        #     transforms.Padding(coarsest_stride=32),
+        # ])
+        # train_dataset = paddlex.datasets.VOCDetection(
+        #     data_dir='./datasets/VOCdevkit/VOC2007',
+        #     file_list='./datasets/VOCdevkit/VOC2007/train_list.txt',
+        #     label_list='./datasets/VOCdevkit/VOC2007/labels.txt',
+        #     transforms=train_transforms,
+        #     shuffle=True)
+        # eval_dataset = paddlex.datasets.VOCDetection(
+        #     data_dir='./datasets/VOCdevkit/VOC2007',
+        #     file_list='./datasets/VOCdevkit/VOC2007/val_list.txt',
+        #     label_list='./datasets/VOCdevkit/VOC2007/labels.txt',
+        #     transforms=eval_transforms)
+        # print(train_dataset)
+
         dataset = VOCDetection(root=data_dir, 
                                 img_size=train_size[0],
                                 transform=SSDAugmentation(train_size)
@@ -124,8 +150,7 @@ def train():
                     dataset, 
                     batch_size=args.batch_size, 
                     shuffle=True, 
-                    collate_fn=detection_collate,
-                    num_workers=args.num_workers
+                    collate_fn=detection_collate
                     )
 
     # build model
@@ -139,7 +164,7 @@ def train():
         exit()
 
     model = yolo_net
-    model.to(device).train()
+    model.train()
 
     # use tfboard
     # if args.tfboard:
@@ -159,10 +184,10 @@ def train():
     # optimizer setup
     base_lr = args.lr
     tmp_lr = base_lr
-    optimizer = paddle.optimizer.SGD(model.parameters(),args.lr,
-                            weight_decay=args.weight_decay
-                            )
-
+    # optimizer = paddle.optimizer.SGD(model.parameters(),args.lr,
+    #                         weight_decay=args.weight_decay
+    #                         )
+    optimizer = paddle.optimizer.SGD(parameters=model.parameters(),weight_decay=args.weight_decay)
     max_epoch = cfg['max_epoch']
     epoch_size = len(dataset) // args.batch_size
 
@@ -190,18 +215,17 @@ def train():
 
         for iter_i, (images, targets) in enumerate(dataloader):
             # WarmUp strategy for learning rate
-            if not args.no_warm_up:
-                if epoch < args.wp_epoch:
-                    tmp_lr = base_lr * pow((iter_i+epoch*epoch_size)*1. / (args.wp_epoch*epoch_size), 4)
-                    # tmp_lr = 1e-6 + (base_lr-1e-6) * (iter_i+epoch*epoch_size) / (epoch_size * (args.wp_epoch))
-                    set_lr(optimizer, tmp_lr)
+            # if not args.no_warm_up:
+            #     if epoch < args.wp_epoch:
+            #         tmp_lr = base_lr * pow((iter_i+epoch*epoch_size)*1. / (args.wp_epoch*epoch_size), 4)
+            #         # tmp_lr = 1e-6 + (base_lr-1e-6) * (iter_i+epoch*epoch_size) / (epoch_size * (args.wp_epoch))
+            #         set_lr(optimizer, tmp_lr)
 
-                elif epoch == args.wp_epoch and iter_i == 0:
-                    tmp_lr = base_lr
-                    set_lr(optimizer, tmp_lr)
-        
-            # to device
-            images = images.to(device)
+            #     elif epoch == args.wp_epoch and iter_i == 0:
+            #         tmp_lr = base_lr
+            #         set_lr(optimizer, tmp_lr)
+            # # to device
+            # images = images.to(device)
 
             # multi-scale trick
             if iter_i % 10 == 0 and iter_i > 0 and args.multi_scale:
@@ -216,7 +240,7 @@ def train():
             # make train label
             targets = [label.tolist() for label in targets]
             targets = tools.gt_creator(input_size=train_size, stride=yolo_net.stride, label_lists=targets)
-            targets = paddle.to_tensor(targets).float().to(device)
+            targets = paddle.to_tensor(targets)
             
             # forward and loss
             conf_loss, cls_loss, txtytwth_loss, total_loss = model(images, target=targets)
@@ -224,10 +248,10 @@ def train():
             # backprop
             total_loss.backward()        
             optimizer.step()
-            optimizer.zero_grad()
+            optimizer.clear_grad()
 
             # display
-            if iter_i % 10 == 0:
+            if iter_i % 2 == 0:
                 # if args.tfboard:
                 #     # viz loss
                 #     writer.add_scalar('object loss', conf_loss.item(), iter_i + epoch * epoch_size)
@@ -240,8 +264,8 @@ def train():
                         % (epoch+1, max_epoch, iter_i, epoch_size, tmp_lr,
                             conf_loss.item(), cls_loss.item(), txtytwth_loss.item(), total_loss.item(), train_size[0], t1-t0),
                         flush=True)
-
                 t0 = time.time()
+                paddle.save(model.state_dict(), './checkpoints/yolo-model.pdparams')
 
         # evaluation
         if (epoch + 1) % args.eval_epoch == 0:
@@ -260,9 +284,7 @@ def train():
         # save model
         if (epoch + 1) % 10 == 0:
             print('Saving state, epoch:', epoch + 1)
-            paddle.save(model.state_dict(), os.path.join(path_to_save,
-                        args.version + '_' + repr(epoch + 1) + '.pth')
-                        )  
+            paddle.save(model.state_dict(), os.path.join(path_to_save,args.version + '_' + repr(epoch + 1) + '.pdparams'))  
 
 
 def set_lr(optimizer, lr):

@@ -4,6 +4,7 @@ from utils import SPP, SAM, BottleneckCSP, Conv
 from backbone import resnet18
 import numpy as np
 import tools
+paddle.disable_static()
 
 class myYOLO(nn.Layer):
     def __init__(self, device, input_size=None, num_classes=20, trainable=False, conf_thresh=0.01, nms_thresh=0.5, hr=False):
@@ -17,6 +18,7 @@ class myYOLO(nn.Layer):
         self.grid_cell = self.create_grid(input_size)
         self.input_size = input_size
         self.scale = np.array([[[input_size[1], input_size[0], input_size[1], input_size[0]]]])
+
         self.scale_paddle = paddle.to_tensor(self.scale.copy())
 
         # we use resnet18 as backbone
@@ -137,12 +139,11 @@ class myYOLO(nn.Layer):
         if im_shape != None:
             # clip
             bbox_pred = self.clip_boxes(bbox_pred, im_shape)
-
         return bbox_pred, scores, cls_inds
 
     def forward(self, x, target=None):
         # backbone
-        _, _, C_5 = self.backbone(x)
+        C_5 = self.backbone(x)
 
         # head
         C_5 = self.SPP(C_5)
@@ -150,30 +151,34 @@ class myYOLO(nn.Layer):
         C_5 = self.conv_set(C_5)
 
         # pred
-        prediction = self.pred(C_5)
-        prediction = prediction.view(C_5.size(0), 1 + self.num_classes + 4, -1).permute(0, 2, 1)
-        B, HW, C = prediction.size()
+        prediction_result = self.pred(C_5)
+        prediction_result=paddle.reshape(prediction_result,shape=[C_5.shape[0], 1 + self.num_classes + 4, -1])
+        prediction_result=paddle.fluid.layers.transpose(prediction_result,perm=[0,2,1])
+
+        # prediction_result = prediction_result.view(C_5.size(0), 1 + self.num_classes + 4, -1).permute(0, 2, 1)
+        # B, HW, C = prediction_result.size()
 
         # Divide prediction to obj_pred, txtytwth_pred and cls_pred   
         # [B, H*W, 1]
-        conf_pred = prediction[:, :, :1]
+        conf_pred = prediction_result[:, :, :1]
         # [B, H*W, num_cls]
-        cls_pred = prediction[:, :, 1 : 1 + self.num_classes]
+        cls_pred = prediction_result[:, :, 1 : 1 + self.num_classes]
         # [B, H*W, 4]
-        txtytwth_pred = prediction[:, :, 1 + self.num_classes:]
+        txtytwth_pred = prediction_result[:, :, 1 + self.num_classes:]
 
         # test
+
         if not self.trainable:
             with paddle.no_grad():
                 # batch size = 1
                 all_conf = paddle.nn.functional.sigmoid(conf_pred)[0]           # 0 is because that these is only 1 batch.
                 all_bbox = paddle.nn.functional.sigmoid((self.decode_boxes(txtytwth_pred) / self.scale_paddle)[0])
-                all_class = (paddle.nn.Softmax(cls_pred[0, :, :], 1) * all_conf)
+                all_class = (paddle.nn.functional.softmax(cls_pred[0, :, :], 1) * all_conf)
                 
                 # separate box pred and class conf
-                all_conf = all_conf.to('cpu').numpy()
-                all_class = all_class.to('cpu').numpy()
-                all_bbox = all_bbox.to('cpu').numpy()
+                all_conf = all_conf.numpy()
+                all_class = all_class.numpy()
+                all_bbox = all_bbox.numpy()
                 
                 bboxes, scores, cls_inds = self.postprocess(all_bbox, all_class)
 

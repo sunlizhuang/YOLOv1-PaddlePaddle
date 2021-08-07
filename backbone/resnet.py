@@ -235,12 +235,12 @@ class ResNet(nn.Layer):
         x = self.layer3(x)
         x = self.layer4(x)
 
-        if self.with_pool:
-            x = self.avgpool(x)
+        # if self.with_pool:
+        #     x = self.avgpool(x)
 
-        if self.num_classes > 0:
-            x = paddle.flatten(x, 1)
-            x = self.fc(x)
+        # if self.num_classes > 0:
+        #     x = paddle.flatten(x, 1)
+        #     x = self.fc(x)
 
         return x
 
@@ -341,10 +341,9 @@ def resnet152(pretrained=False, **kwargs):
 
 if __name__=='__main__':
     #model = torchvision.models.resnet50()
-    print("found ", paddle.device.get_device(), " GPU(s)")
     device = paddle.device.set_device("cuda")
     model = resnet101(detection=True).to(device)
-    print(model)
+
 
     input = paddle.randn(1, 3, 512, 512).to(device)
     output = model(input)

@@ -13,6 +13,8 @@ import cv2
 import numpy as np
 import random
 
+paddle.disable_static()
+
 if sys.version_info[0] == 2:
     import xml.etree.cElementTree as ET
 else:
@@ -98,7 +100,7 @@ class VOCDetection(paddle.io.Dataset):
     """
 
     def __init__(self, root, img_size,
-                 image_sets=[('2007', 'trainval'), ('2012', 'trainval')],
+                 image_sets=[('2007', 'trainval')],
                  transform=None, target_transform=VOCAnnotationTransform(),
                  dataset_name='VOC0712', mosaic=False):
         self.root = root
@@ -219,7 +221,7 @@ class VOCDetection(paddle.io.Dataset):
             scale =  np.array([[1., 1., 1., 1.]])
             offset = np.zeros([1, 4])
 
-            return paddle.to_tensor(mosaic_img).permute(2, 0, 1).float(), mosaic_tg, self.img_size, self.img_size
+            return paddle.fluid.layers.transpose(paddle.to_tensor(mosaic_img),perm=[2,0,1]), mosaic_tg, self.img_size, self.img_size
 
         # basic augmentation(SSDAugmentation or BaseTransform)
         if self.transform is not None:
@@ -234,7 +236,7 @@ class VOCDetection(paddle.io.Dataset):
             img = img[:, :, (2, 1, 0)]
             # img = img.transpose(2, 0, 1)
             target = np.hstack((boxes, np.expand_dims(labels, axis=1)))
-        return paddle.to_tensor(img).permute(2, 0, 1), target, height, width
+        return paddle.fluid.layers.transpose(paddle.to_tensor(img),perm=[2,0,1]), target, height, width
         # return paddle.to_tensor(img), target, height, width
 
 

@@ -1,4 +1,5 @@
 import paddle
+import paddle.nn as nn
 from data import VOCDetection
 import sys
 import os
@@ -12,7 +13,7 @@ else:
     import xml.etree.ElementTree as ET
 
 
-class VOCAPIEvaluator():
+class VOCAPIEvaluator(nn.Layer):
     """ VOC AP Evaluation class """
     def __init__(self, data_root, img_size, device, transform, labelmap, set_type='test', year='2007', display=False):
         self.data_root = data_root
@@ -53,7 +54,7 @@ class VOCAPIEvaluator():
         for i in range(num_images):
             im, gt, h, w = self.dataset.pull_item(i)
 
-            x = paddle.to_tensor(im.unsqueeze(0)).to(self.device)
+            x = paddle.to_tensor(im.unsqueeze(0))
             t0 = time.time()
             # forward
             bboxes, scores, cls_inds = net(x)

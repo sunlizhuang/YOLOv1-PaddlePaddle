@@ -12,7 +12,7 @@ parser.add_argument('-v', '--version', default='yolo',
 parser.add_argument('-d', '--dataset', default='voc',
                     help='voc, coco-val, coco-test.')
 parser.add_argument('--trained_model', type=str,
-                    default='./weight/voc/yolo_64.4_68.5_71.5.pth',
+                    default='./checkpoints/yolo-model.pdparams',
                     help='Trained state_dict file path to open')
 parser.add_argument('-size', '--input_size', default=416, type=int,
                     help='input_size')
@@ -72,12 +72,20 @@ if __name__ == '__main__':
 
     # load net
     # net.load_state_dict(paddle.load(args.trained_model, map_location='cuda'))
-    net.load_state_dict(paddle.load(args.trained_model,map_location='cpu'))
+    net.set_state_dict(paddle.load(args.trained_model))
     net.eval()
     print('Finished loading model!')
-    net = net.to(device)
+    # net = net.to(device)
     
     # evaluation
-    with paddle.no_grad():
-        if args.dataset == 'voc':
-            voc_test(net, device, input_size)
+    evaluator = VOCAPIEvaluator(data_root=VOC_ROOT,
+                            img_size=input_size,
+                            device=device,
+                            transform=BaseTransform(input_size),
+                            labelmap=VOC_CLASSES,
+                            display=True
+                            )
+    evaluator.evaluate(net)
+    # with paddle.no_grad():
+    #     if args.dataset == 'voc':
+    #         voc_test(net, device, input_size)

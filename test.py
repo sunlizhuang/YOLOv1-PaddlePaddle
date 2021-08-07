@@ -15,7 +15,7 @@ parser.add_argument('-d', '--dataset', default='voc',
                     help='voc, coco-val.')
 parser.add_argument('-size', '--input_size', default=416, type=int,
                     help='input_size')
-parser.add_argument('--trained_model', default='./weight/voc/yolo_64.4_68.5_71.5.pth',
+parser.add_argument('--trained_model', default='./checkpoints/yolo-model.pdparams',
                     type=str, help='Trained state_dict file path to open')
 parser.add_argument('--conf_thresh', default=0.1, type=float,
                     help='Confidence threshold')
@@ -50,8 +50,9 @@ def test(net, device, testset, transform, thresh, class_colors=None, class_names
         h, w, _ = img.shape
 
         # to tensor
-        x = paddle.to_tensor(transform(img)[0][:, :, (2, 1, 0)]).permute(2, 0, 1)
-        x = x.unsqueeze(0).to(device)
+        x = paddle.to_tensor(transform(img)[0][:, :, (2, 1, 0)])
+        x=paddle.fluid.layers.transpose(x,perm=[2,0,1])
+        x = x.unsqueeze(0)
 
         t0 = time.time()
         # forward
@@ -100,9 +101,8 @@ if __name__ == '__main__':
     else:
         print('Unknown Version !!!')
         exit()
-
-    net.load_state_dict(paddle.load(args.trained_model, map_location=device))
-    net.to(device).eval()
+    net.set_state_dict(paddle.load(args.trained_model))
+    net.eval()
     print('Finished loading model!')
 
     # evaluation
