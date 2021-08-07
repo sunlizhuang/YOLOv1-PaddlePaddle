@@ -46,7 +46,6 @@ sh data/scripts/VOC2012.sh # <directory>
 python train.py
 ```
 
-You can run ```python train.py -h``` to check all optional argument.
 
 ## Test
 ```Shell
