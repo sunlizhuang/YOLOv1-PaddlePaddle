@@ -20,7 +20,7 @@ Environment:
 - Python3.6, opencv-python, PaddlePaddle 2.1.0
 
 
-## Try On aistudio
+## Try On AI Studio
 https://aistudio.baidu.com/aistudio/projectdetail/2259467
 
 
@@ -28,8 +28,8 @@ https://aistudio.baidu.com/aistudio/projectdetail/2259467
 
 You will get a ```VOCdevkit.zip```, then what you need to do is just to unzip it and put it into ```data/```. After that, the whole path to VOC dataset is:
 
-- ```data/VOCdevkit/VOC2007```
-- ```data/VOCdevkit/VOC2012```.
+- ```datasets/VOCdevkit/VOC2007```
+
 
 #### Download VOC2007 trainval & test
 
@@ -38,11 +38,6 @@ You will get a ```VOCdevkit.zip```, then what you need to do is just to unzip it
 sh data/scripts/VOC2007.sh # <directory>
 ```
 
-#### Download VOC2012 trainval
-```Shell
-# specify a directory for dataset to be downloaded into, else default is ~/data/
-sh data/scripts/VOC2012.sh # <directory>
-```
 
 # Train
 ```Shell
