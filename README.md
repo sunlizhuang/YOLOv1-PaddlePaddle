@@ -34,7 +34,7 @@ https://aistudio.baidu.com/aistudio/projectdetail/2259467
 
 
 
-You will get a ```VOCdevkit.zip```, then what you need to do is just to unzip it and put it into ```data/```. After that, the whole path to VOC dataset is:
+You will get a ```VOCdevkit.zip```, then what you need to do is just to unzip it and put it into ```datasets/```. After that, the whole path to VOC dataset is:
 
 - ```datasets/VOCdevkit/VOC2007```
 
