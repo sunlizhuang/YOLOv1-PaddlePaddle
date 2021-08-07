@@ -20,6 +20,9 @@ Environment:
 - Python3.6, opencv-python, PaddlePaddle 2.1.0
 
 
+## Try On aistudio
+https://aistudio.baidu.com/aistudio/projectdetail/2259467
+
 
 
 
