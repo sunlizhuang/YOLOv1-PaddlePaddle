@@ -15,7 +15,7 @@ parser.add_argument('-d', '--dataset', default='voc',
                     help='voc, coco-val.')
 parser.add_argument('-size', '--input_size', default=416, type=int,
                     help='input_size')
-parser.add_argument('--trained_model', default='./checkpoints/yolo-model.pdparams',
+parser.add_argument('--trained_model', default='./checkpoints/yolo-model-best.pdparams',
                     type=str, help='Trained state_dict file path to open')
 parser.add_argument('--conf_thresh', default=0.1, type=float,
                     help='Confidence threshold')
@@ -63,7 +63,6 @@ def test(net, device, testset, transform, thresh, class_colors=None, class_names
         scale = np.array([[w, h, w, h]])
         # map the boxes to origin image scale
         bboxes *= scale
-
         img_processed = vis(img, bboxes, scores, cls_inds, thresh, class_colors, class_names, class_indexs, dataset)
         # cv2.imshow('detection', img_processed)
         # cv2.waitKey(0)

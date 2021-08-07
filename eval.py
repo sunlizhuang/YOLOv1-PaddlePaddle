@@ -12,7 +12,7 @@ parser.add_argument('-v', '--version', default='yolo',
 parser.add_argument('-d', '--dataset', default='voc',
                     help='voc, coco-val, coco-test.')
 parser.add_argument('--trained_model', type=str,
-                    default='./checkpoints/yolo-model.pdparams',
+                    default='./checkpoints/yolo-model-best.pdparams',
                     help='Trained state_dict file path to open')
 parser.add_argument('-size', '--input_size', default=416, type=int,
                     help='input_size')

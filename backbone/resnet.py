@@ -196,8 +196,8 @@ class ResNet(nn.Layer):
         if with_pool:
             self.avgpool = nn.AdaptiveAvgPool2D((1, 1))
 
-        if num_classes > 0:
-            self.fc = nn.Linear(512 * block.expansion, num_classes)
+        # if num_classes > 0:
+        #     self.fc = nn.Linear(512 * block.expansion, num_classes)
 
     def _make_layer(self, block, planes, blocks, stride=1, dilate=False):
         norm_layer = self._norm_layer

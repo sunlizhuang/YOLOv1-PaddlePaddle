@@ -265,7 +265,7 @@ def train():
                             conf_loss.item(), cls_loss.item(), txtytwth_loss.item(), total_loss.item(), train_size[0], t1-t0),
                         flush=True)
                 t0 = time.time()
-                paddle.save(model.state_dict(), './checkpoints/yolo-model.pdparams')
+                paddle.save(model.state_dict(), './checkpoints/yolo-model-no-fc.pdparams')
 
         # evaluation
         if (epoch + 1) % args.eval_epoch == 0:

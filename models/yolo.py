@@ -144,16 +144,20 @@ class myYOLO(nn.Layer):
     def forward(self, x, target=None):
         # backbone
         C_5 = self.backbone(x)
-
+        
         # head
         C_5 = self.SPP(C_5)
+        
         C_5 = self.SAM(C_5)
         C_5 = self.conv_set(C_5)
+        
 
         # pred
         prediction_result = self.pred(C_5)
+
         prediction_result=paddle.reshape(prediction_result,shape=[C_5.shape[0], 1 + self.num_classes + 4, -1])
         prediction_result=paddle.fluid.layers.transpose(prediction_result,perm=[0,2,1])
+
 
         # prediction_result = prediction_result.view(C_5.size(0), 1 + self.num_classes + 4, -1).permute(0, 2, 1)
         # B, HW, C = prediction_result.size()
@@ -171,8 +175,9 @@ class myYOLO(nn.Layer):
         if not self.trainable:
             with paddle.no_grad():
                 # batch size = 1
+                
                 all_conf = paddle.nn.functional.sigmoid(conf_pred)[0]           # 0 is because that these is only 1 batch.
-                all_bbox = paddle.nn.functional.sigmoid((self.decode_boxes(txtytwth_pred) / self.scale_paddle)[0])
+                all_bbox = paddle.fluid.layers.clip((self.decode_boxes(txtytwth_pred) / self.scale_paddle)[0], 0., 1.)
                 all_class = (paddle.nn.functional.softmax(cls_pred[0, :, :], 1) * all_conf)
                 
                 # separate box pred and class conf
