@@ -18,7 +18,7 @@ This is a a new version of YOLOv1 built by PaddlePaddle:
 Environment:
 
 - Python3.6, opencv-python, PaddlePaddle 2.1.0
-- 
+
 - VOC:
 <table><tbody>
 <tr><th align="left" bgcolor=#f8f8f8> </th>     <td bgcolor=white> size </td><td bgcolor=white> mAP </td></tr>
