@@ -4,7 +4,7 @@
 # Network
 This is a a new version of YOLOv1 built by PaddlePaddle:
 - Backbone: resnet18
-- Head: SPP, SAM
+
 
 # Train
 - Batchsize: 32
