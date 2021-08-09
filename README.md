@@ -1,6 +1,6 @@
 # YOLOv1-PaddlePaddle
 
-#需要验证mAP是否符合精度，再解压好数据集后，直接运行python eval.py 即可，已经上传checkpoints
+# 需要验证mAP是否符合精度，再解压好数据集后，直接运行python eval.py 即可，已经上传checkpoints
 
 # Network
 This is a a new version of YOLOv1 built by PaddlePaddle:
