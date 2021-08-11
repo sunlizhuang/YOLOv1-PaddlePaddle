@@ -1,6 +1,6 @@
 # YOLOv1-PaddlePaddle
 
-# 如果需要验证mAP是否符合精度，在AIStudio上Fork后，在work/datasets解压好数据集后，直接运行python eval.py 即可，已经上传checkpoints
+# 如果需要验证mAP是否符合精度，在AIStudio上Fork后，在work/datasets解压好测试数据集后，直接运行python eval.py 即可，已经上传checkpoints
 
 # Network
 This is a a new version of YOLOv1 built by PaddlePaddle:
