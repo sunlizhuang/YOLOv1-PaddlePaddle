@@ -53,8 +53,6 @@ class SPP(nn.Layer):
 
         return x
 
-
-# Copy from yolov5
 class Bottleneck(nn.Layer):
     # Standard bottleneck
     def __init__(self, c1, c2, shortcut=True, g=1, e=0.5):  # ch_in, ch_out, shortcut, groups, expansion
@@ -68,7 +66,6 @@ class Bottleneck(nn.Layer):
         return x + self.cv2(self.cv1(x)) if self.add else self.cv2(self.cv1(x))
 
 
-# Copy from yolov5
 class BottleneckCSP(nn.Layer):
     # CSP Bottleneck https://github.com/WongKinYiu/CrossStagePartialNetworks
     def __init__(self, c1, c2, n=1, shortcut=True, g=1, e=0.5):  # ch_in, ch_out, number, shortcut, groups, expansion
