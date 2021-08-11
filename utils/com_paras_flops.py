@@ -4,7 +4,7 @@ from models.yolo_v1 import myYOLOv1 as net_1
 
 
 
-device = paddle.device.set_device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = paddle.device.set_device("gpu")
 
 def main():
     input_image = paddle.randn(1, 3, 320, 640).to(device)

@@ -23,7 +23,7 @@ parser.add_argument('--nms_thresh', default=0.50, type=float,
                     help='NMS threshold')
 parser.add_argument('--visual_threshold', default=0.3, type=float,
                     help='Final confidence threshold')
-parser.add_argument('--cuda', action='store_true', default=False, 
+parser.add_argument('--gpu', action='store_true', default=True, 
                     help='use cuda.')
 
 args = parser.parse_args()
@@ -73,9 +73,9 @@ def test(net, device, testset, transform, thresh, class_colors=None, class_names
 
 if __name__ == '__main__':
     # get device
-    if args.cuda:
-        print('use cuda')
-        device = paddle.device.set_device("cuda")
+    if args.gpu:
+        print('use gpu')
+        device = paddle.device.set_device("gpu")
     else:
         device = paddle.device.set_device("cpu")
 

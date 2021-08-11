@@ -16,8 +16,8 @@ parser.add_argument('--trained_model', type=str,
                     help='Trained state_dict file path to open')
 parser.add_argument('-size', '--input_size', default=416, type=int,
                     help='input_size')
-parser.add_argument('--cuda', action='store_true', default=False,
-                    help='Use cuda')
+parser.add_argument('--gpu', action='store_true', default=True,
+                    help='Use gpu')
 
 args = parser.parse_args()
 
@@ -51,10 +51,10 @@ if __name__ == '__main__':
         print('unknow dataset !! we only support voc, coco-val, coco-test !!!')
         exit(0)
 
-    # cuda
-    if args.cuda:
-        print('use cuda')
-        device = paddle.device.set_device("cuda")
+    # gpu
+    if args.gpu:
+        print('use gpu')
+        device = paddle.device.set_device("gpu")
     else:
         device = paddle.device.set_device("cpu")
 

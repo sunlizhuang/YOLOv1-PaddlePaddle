@@ -1,7 +1,7 @@
 import paddle
 import paddle.nn as nn
 from utils import SPP, SAM, BottleneckCSP, Conv
-from backbone import resnet18
+from backbone.resnet import resnet18
 import numpy as np
 import tools
 paddle.disable_static()
@@ -52,7 +52,7 @@ class myYOLO(nn.Layer):
         self.input_size = input_size
         self.grid_cell = self.create_grid(input_size)
         self.scale = np.array([[[input_size[1], input_size[0], input_size[1], input_size[0]]]])
-        self.scale_paddle = paddle.to_tensor(self.scale.copy(), device=self.device).float()
+        self.scale_paddle = paddle.to_tensor(self.scale.copy()).astype('float32')
 
     def decode_boxes(self, pred):
         """

@@ -11,23 +11,10 @@ class MSELoss(nn.Layer):
         super(MSELoss, self).__init__()
         self.reduction = reduction
     def forward(self, inputs, targets):
-        targets_np=targets.numpy()
-        pos_id=(targets_np==1.0).astype('float')
-        neg_id=(targets_np==0.0).astype('float')
-
-        pos_id = paddle.to_tensor(pos_id).astype('float32')
-        neg_id = paddle.to_tensor(neg_id).astype('float32')
-        
-        i_t_square=paddle.square(inputs - targets)
-        pos_id=pos_id.numpy()
-        i_t_square=i_t_square.numpy()
-        pos_loss=pos_id*i_t_square
-        pos_loss=paddle.to_tensor(pos_loss)
-        i_square=paddle.square(inputs)
-        neg_id=neg_id.numpy()
-        i_square=i_square.numpy()
-        neg_loss = neg_id * i_square
-        neg_loss=paddle.to_tensor(neg_loss)
+        pos_id=(targets==1.0).astype('float')
+        neg_id=(targets==0.0).astype('float')
+        pos_loss = pos_id * (inputs - targets)**2
+        neg_loss = neg_id * (inputs)**2
 
         if self.reduction == 'mean':
             pos_loss = paddle.mean(paddle.sum(pos_loss, 1))
@@ -103,7 +90,7 @@ def loss(pred_conf, pred_cls, pred_txtytwth, label):
 
     # create loss_f
     conf_loss_function = MSELoss(reduction='mean')
-    cls_loss_function = nn.CrossEntropyLoss(reduction='mean')
+    cls_loss_function = nn.CrossEntropyLoss(reduction='none')
     txty_loss_function = nn.BCEWithLogitsLoss(reduction='none')
     twth_loss_function = nn.MSELoss(reduction='none')
 
@@ -134,20 +121,16 @@ def loss(pred_conf, pred_cls, pred_txtytwth, label):
     pred_cls_t=paddle.fluid.layers.transpose(pred_cls,perm=[2,0,1])
     gt_cls_t=paddle.fluid.layers.transpose(gt_cls,perm=[1,0])
 
-    cls_loss_total=[]
+    cls_loss_total=paddle.zeros(shape=[0])
     for i in range(169):
-        temp=[]
         for j in range(32):
-            temp.append(cls_loss_function(pred_cls_t[i][j],gt_cls_t[i][j]).numpy())
-               
-        cls_loss_total.append(temp)
-    cls_loss_total=paddle.to_tensor(cls_loss_total)
+            cls_loss_total=paddle.concat(x=[cls_loss_total,cls_loss_function(input=pred_cls_t[i][j],label=gt_cls_t[i][j])],axis=0)
+
+    cls_loss_total=paddle.to_tensor(cls_loss_total,stop_gradient=False)
     cls_loss_total=paddle.reshape(cls_loss_total,shape=[32,169])
-    
-    cls_loss_total=cls_loss_total.numpy()
-    gt_obj=gt_obj.numpy()
+
     temp_result=cls_loss_total * gt_obj
-    temp_result=paddle.to_tensor(temp_result).astype('float32')
+    temp_result=paddle.to_tensor(temp_result,stop_gradient=False).astype('float32')
     
 
     cls_loss = paddle.mean(paddle.sum(temp_result, 1))
@@ -157,20 +140,9 @@ def loss(pred_conf, pred_cls, pred_txtytwth, label):
     pred_txty=pred_txty.astype('float32')
     gt_txtytwth=gt_txtytwth.astype('float32')
 
-    temp_result1_np=paddle.sum(txty_loss_function(pred_txty, gt_txtytwth[:, :, :2]), 2).numpy()
-    gt_box_scale_weight_np=gt_box_scale_weight.numpy()
-    gt_obj_np=gt_obj
-    temp_result_2=temp_result1_np*gt_box_scale_weight_np*gt_obj_np
-    temp_result_2=paddle.to_tensor(temp_result_2)
-    
-    temp_result3_np=paddle.sum(twth_loss_function(pred_twth, gt_txtytwth[:, :, 2:]), 2).numpy()
-    temp_result4=temp_result3_np*gt_box_scale_weight_np*gt_obj_np
-    temp_result4=paddle.to_tensor(temp_result4)
 
-
-
-    txty_loss = paddle.mean(paddle.sum(temp_result_2,1))
-    twth_loss = paddle.mean(paddle.sum(temp_result4, 1))
+    txty_loss = paddle.mean(paddle.sum(paddle.sum(txty_loss_function(pred_txty, gt_txtytwth[:, :, :2]), 2) * gt_box_scale_weight * gt_obj, 1))
+    twth_loss = paddle.mean(paddle.sum(paddle.sum(twth_loss_function(pred_twth, gt_txtytwth[:, :, 2:]), 2) * gt_box_scale_weight * gt_obj, 1))
 
     txtytwth_loss = txty_loss + twth_loss
 

@@ -100,7 +100,7 @@ class VOCDetection(paddle.io.Dataset):
     """
 
     def __init__(self, root, img_size,
-                 image_sets=[('2007', 'trainval')],
+                 image_sets=[('2007', 'trainval'), ('2012', 'trainval')],
                  transform=None, target_transform=VOCAnnotationTransform(),
                  dataset_name='VOC0712', mosaic=False):
         self.root = root

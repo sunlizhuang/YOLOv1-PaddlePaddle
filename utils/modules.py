@@ -75,8 +75,8 @@ class BottleneckCSP(nn.Layer):
         super(BottleneckCSP, self).__init__()
         c_ = int(c2 * e)  # hidden channels
         self.cv1 = Conv(c1, c_, k=1)
-        self.cv2 = nn.Conv2D(c1, c_, kernel_size=1)
-        self.cv3 = nn.Conv2D(c_, c_, kernel_size=1)
+        self.cv2 = nn.Conv2D(c1, c_, kernel_size=1,bias_attr=False)
+        self.cv3 = nn.Conv2D(c_, c_, kernel_size=1,bias_attr=False)
         self.cv4 = Conv(2 * c_, c2, k=1)
         self.bn = nn.BatchNorm2D(2 * c_)  # applied to cat(cv2, cv3)
         self.act = nn.LeakyReLU(0.1)
