@@ -15,7 +15,7 @@ parser.add_argument('-d', '--dataset', default='voc',
                     help='voc, coco-val.')
 parser.add_argument('-size', '--input_size', default=416, type=int,
                     help='input_size')
-parser.add_argument('--trained_model', default='./checkpoints/yolo-model-best.pdparams',
+parser.add_argument('--trained_model', default='./checkpoints/yolo-model-best-2.pdparams',
                     type=str, help='Trained state_dict file path to open')
 parser.add_argument('--conf_thresh', default=0.1, type=float,
                     help='Confidence threshold')

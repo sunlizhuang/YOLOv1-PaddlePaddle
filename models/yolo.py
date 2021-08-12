@@ -1,6 +1,7 @@
 import paddle
 import paddle.nn as nn
-from utils import SPP, SAM, BottleneckCSP, Conv
+# from utils import SPP, SAM, BottleneckCSP, Conv
+from utils import Conv
 from backbone.resnet import resnet18
 import numpy as np
 import tools
@@ -20,18 +21,16 @@ class myYOLO(nn.Layer):
         self.scale = np.array([[[input_size[1], input_size[0], input_size[1], input_size[0]]]])
 
         self.scale_paddle = paddle.to_tensor(self.scale.copy())
-
         # we use resnet18 as backbone
         self.backbone = resnet18(pretrained=True)
-
         # neck
-        self.SPP = nn.Sequential(
-            Conv(512, 256, k=1),
-            SPP(),
-            BottleneckCSP(256*4, 512, n=1, shortcut=False)
-        )
-        self.SAM = SAM(512)
-        self.conv_set = BottleneckCSP(512, 512, n=3, shortcut=False)
+        # self.SPP = nn.Sequential(
+        #     Conv(512, 256, k=1),
+        #     SPP(),
+        #     BottleneckCSP(256*4, 512, n=1, shortcut=False)
+        # )
+        # self.SAM = SAM(512)
+        # self.conv_set = BottleneckCSP(512, 512, n=3, shortcut=False)
 
         self.pred = nn.Conv2D(512, 1 + self.num_classes + 4, 1)
     
@@ -109,7 +108,6 @@ class myYOLO(nn.Layer):
         """
         bbox_pred = all_local
         prob_pred = all_conf
-
         cls_inds = np.argmax(prob_pred, axis=1)
         prob_pred = prob_pred[(np.arange(prob_pred.shape[0]), cls_inds)]
         scores = prob_pred.copy()
@@ -146,10 +144,10 @@ class myYOLO(nn.Layer):
         C_5 = self.backbone(x)
         
         # head
-        C_5 = self.SPP(C_5)
+        # C_5 = self.SPP(C_5)
         
-        C_5 = self.SAM(C_5)
-        C_5 = self.conv_set(C_5)
+        # C_5 = self.SAM(C_5)
+        # C_5 = self.conv_set(C_5)
         
 
         # pred

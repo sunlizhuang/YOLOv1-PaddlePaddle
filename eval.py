@@ -72,20 +72,20 @@ if __name__ == '__main__':
 
     # load net
     # net.load_state_dict(paddle.load(args.trained_model, map_location='cuda'))
-    net.set_state_dict(paddle.load(args.trained_model))
+    net.load_dict(paddle.load(args.trained_model))
     net.eval()
     print('Finished loading model!')
     # net = net.to(device)
     
     # evaluation
-    evaluator = VOCAPIEvaluator(data_root=VOC_ROOT,
-                            img_size=input_size,
-                            device=device,
-                            transform=BaseTransform(input_size),
-                            labelmap=VOC_CLASSES,
-                            display=True
-                            )
-    evaluator.evaluate(net)
-    # with paddle.no_grad():
-    #     if args.dataset == 'voc':
-    #         voc_test(net, device, input_size)
+    # evaluator = VOCAPIEvaluator(data_root=VOC_ROOT,
+    #                         img_size=input_size,
+    #                         device=device,
+    #                         transform=BaseTransform(input_size),
+    #                         labelmap=VOC_CLASSES,
+    #                         display=True
+    #                         )
+    # evaluator.evaluate(net)
+    with paddle.no_grad():
+        if args.dataset == 'voc':
+            voc_test(net, device, input_size)

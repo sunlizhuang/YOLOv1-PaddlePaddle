@@ -13,7 +13,7 @@ from data import *
 import tools
 # import paddlex
 # from paddlex.det import transforms
-from utils.augmentations import SSDAugmentation
+# from utils.augmentations import SSDAugmentation
 from utils.vocapi_evaluator import VOCAPIEvaluator
 import logging
 # from visualdl import LogWriter
@@ -40,10 +40,9 @@ def parse_args():
                         help='The upper bound of warm-up')
     parser.add_argument('--start_epoch', type=int, default=0,
                         help='start epoch to train')
-    # parser.add_argument('-r', '--resume', default='./checkpoints/yolo-model-best.pdparams', type=str,
+    parser.add_argument('-r', '--resume', default=None, type=str,help='keep training')
+    # parser.add_argument('-r', '--resume', default=None, type=str,
     #                     help='keep training')
-    parser.add_argument('-r', '--resume', default=None, type=str,
-                        help='keep training')
     parser.add_argument('--momentum', default=0.9, type=float, 
                         help='Momentum value for optim')
     parser.add_argument('--weight_decay', default=5e-4, type=float, 
@@ -54,7 +53,7 @@ def parse_args():
                         help='Number of workers used in dataloading')
     parser.add_argument('--eval_epoch', type=int,
                             default=10, help='interval between evaluations')
-    parser.add_argument('--gpu', action='store_true', default=False,
+    parser.add_argument('--gpu', action='store_true', default=True,
                         help='use gpu.')
     parser.add_argument('--tfboard', action='store_true', default=False,
                         help='use tensorboard')
@@ -105,9 +104,20 @@ def train():
         num_classes = 20
         print(data_dir)
 
+        # dataset = VOCDetection(root=data_dir, 
+        #                         img_size=train_size[0],
+        #                         transform=SSDAugmentation(train_size)
+        #                         )
+
+        # evaluator = VOCAPIEvaluator(data_root=data_dir,
+        #                             img_size=val_size,
+        #                             device=device,
+        #                             transform=BaseTransform(val_size),
+        #                             labelmap=VOC_CLASSES
+        #                             )
         dataset = VOCDetection(root=data_dir, 
                                 img_size=train_size[0],
-                                transform=SSDAugmentation(train_size)
+                                transform=BaseTransform(val_size)
                                 )
 
         evaluator = VOCAPIEvaluator(data_root=data_dir,
@@ -153,11 +163,8 @@ def train():
     # optimizer setup
     base_lr = args.lr
     tmp_lr = base_lr
-    # optimizer = paddle.optimizer.SGD(model.parameters(),args.lr,
-    #                         weight_decay=args.weight_decay
-    #                         )
-    # optimizer=paddle.optimizer.Momentum(parameters=model.parameters(), learning_rate=0.000001, momentum=args.momentum,weight_decay=args.weight_decay,use_nesterov=True)
-    # optimizer = paddle.optimizer.SGD(parameters=model.parameters(),weight_decay=args.weight_decay)
+    optimizer=paddle.optimizer.Momentum(parameters=model.parameters(), learning_rate=args.lr, momentum=args.momentum,weight_decay=args.weight_decay,use_nesterov=True)
+  
     max_epoch = cfg['max_epoch']
     epoch_size = len(dataset) // args.batch_size
 
@@ -165,8 +172,7 @@ def train():
     t0 = time.time()
 
     for epoch in range(args.start_epoch, max_epoch):
-        optimizer = paddle.optimizer.Momentum(parameters=model.parameters(), learning_rate=args.lr,
-                                              momentum=args.momentum, weight_decay=args.weight_decay, use_nesterov=True)
+
 
         # use cos lr
         if args.cos and epoch > 20 and epoch <= max_epoch - 20:
@@ -221,16 +227,15 @@ def train():
             total_loss.backward()
             optimizer.step()
             optimizer.clear_grad()
-            print(model.parameters()[0][0][0])
+            paddle.save(model.state_dict(), './checkpoints/yolo-model-best-2.pdparams')
 
             # optimizer.clear_grad()
 
 
             # display
             if iter_i % 10 == 0:
-
                 logging.info('[Epoch %d/%d][Iter %d/%d][lr %.6f]'
-                    '[Loss: obj %.2f || cls %.2f || bbox %.2f || total %.2f || size %d]'
+                    '[Loss: obj %.2f || cls %.2f || bbox %.2f || total %.2f || size %d ]'
                         % (epoch+1, max_epoch, iter_i, epoch_size, tmp_lr,
                             conf_loss.item(), cls_loss.item(), txtytwth_loss.item(), total_loss.item(), train_size[0]))
 
@@ -240,25 +245,20 @@ def train():
                             conf_loss.item(), cls_loss.item(), txtytwth_loss.item(), total_loss.item(), train_size[0]),
                         flush=True)
 
+            
+            if iter_i %500==0 and iter_i!=0:
+                model.trainable = False
+                model.set_grid(val_size)
+                model.eval()
 
-        # evaluation
-        if (epoch + 1) % 1 == 0:
-            model.trainable = False
-            model.set_grid(val_size)
-            model.eval()
+                # evaluate
+                evaluator.evaluate(model)
+                # convert to training mode.
+                model.trainable = True
+                model.set_grid(train_size)
+                model.train()
+                paddle.save(model.state_dict(), './checkpoints/yolo-model-best-2.pdparams')
 
-            # evaluate
-            evaluator.evaluate(model)
-
-            # convert to training mode.
-            model.trainable = True
-            model.set_grid(train_size)
-            model.train()
-
-        # save model
-        if (epoch + 1) % 10 == 0:
-            print('Saving state, epoch:', epoch + 1)
-            paddle.save(model.state_dict(), './checkpoints/yolo-model.pdparams')
 
 
 def set_lr(optimizer, lr):
