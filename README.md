@@ -13,6 +13,7 @@ This is a a new version of YOLOv1 built by PaddlePaddle:
 - Max epoch: 160
 - LRstep: 60, 90
 - optimizer: SGD
+采用动态调整学习率的策略，mAP达到0.6542，大于原文的63.4
 
 
 ## Experiment
@@ -23,8 +24,7 @@ Environment:
 - VOC:
 <table><tbody>
 <tr><th align="left" bgcolor=#f8f8f8> </th>     <td bgcolor=white> size </td><td bgcolor=white> mAP </td></tr>
-<tr><th align="left" bgcolor=#f8f8f8> VOC2007 test</th><td bgcolor=white> 320 </td><td bgcolor=white> 63.4 </td></tr>
-<tr><th align="left" bgcolor=#f8f8f8> VOC2007 test</th><td bgcolor=white> 416 </td><td bgcolor=white> 68.6 </td></tr>
+<tr><th align="left" bgcolor=#f8f8f8> VOC2007 test</th><td bgcolor=white> 416 </td><td bgcolor=white> 65.42</td></tr>
 </table></tbody>
 
 
