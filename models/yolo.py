@@ -1,6 +1,5 @@
 import paddle
 import paddle.nn as nn
-# from utils import SPP, SAM, BottleneckCSP, Conv
 from utils import Conv
 from backbone.resnet import resnet18
 import numpy as np
@@ -23,15 +22,6 @@ class myYOLO(nn.Layer):
         self.scale_paddle = paddle.to_tensor(self.scale.copy())
         # we use resnet18 as backbone
         self.backbone = resnet18(pretrained=True)
-        # neck
-        # self.SPP = nn.Sequential(
-        #     Conv(512, 256, k=1),
-        #     SPP(),
-        #     BottleneckCSP(256*4, 512, n=1, shortcut=False)
-        # )
-        # self.SAM = SAM(512)
-        # self.conv_set = BottleneckCSP(512, 512, n=3, shortcut=False)
-
         self.pred = nn.Conv2D(512, 1 + self.num_classes + 4, 1)
     
     def create_grid(self, input_size):
@@ -142,12 +132,7 @@ class myYOLO(nn.Layer):
     def forward(self, x, target=None):
         # backbone
         C_5 = self.backbone(x)
-        
-        # head
-        # C_5 = self.SPP(C_5)
-        
-        # C_5 = self.SAM(C_5)
-        # C_5 = self.conv_set(C_5)
+       
         
 
         # pred
