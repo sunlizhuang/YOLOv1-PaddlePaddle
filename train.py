@@ -11,12 +11,8 @@ import paddle.optimizer as optim
 paddle.disable_static()
 from data import *
 import tools
-# import paddlex
-# from paddlex.det import transforms
-# from utils.augmentations import SSDAugmentation
 from utils.vocapi_evaluator import VOCAPIEvaluator
 import logging
-# from visualdl import LogWriter
 logging.basicConfig(filename='./TrainLog.txt',level=logging.INFO)
 def parse_args():
     parser = argparse.ArgumentParser(description='YOLO Detection')
@@ -41,8 +37,6 @@ def parse_args():
     parser.add_argument('--start_epoch', type=int, default=0,
                         help='start epoch to train')
     parser.add_argument('-r', '--resume', default=None, type=str,help='keep training')
-    # parser.add_argument('-r', '--resume', default=None, type=str,
-    #                     help='keep training')
     parser.add_argument('--momentum', default=0.9, type=float, 
                         help='Momentum value for optim')
     parser.add_argument('--weight_decay', default=5e-4, type=float, 
@@ -103,18 +97,6 @@ def train():
         data_dir = VOC_ROOT
         num_classes = 20
         print(data_dir)
-
-        # dataset = VOCDetection(root=data_dir, 
-        #                         img_size=train_size[0],
-        #                         transform=SSDAugmentation(train_size)
-        #                         )
-
-        # evaluator = VOCAPIEvaluator(data_root=data_dir,
-        #                             img_size=val_size,
-        #                             device=device,
-        #                             transform=BaseTransform(val_size),
-        #                             labelmap=VOC_CLASSES
-        #                             )
         dataset = VOCDetection(root=data_dir, 
                                 img_size=train_size[0],
                                 transform=BaseTransform(val_size)

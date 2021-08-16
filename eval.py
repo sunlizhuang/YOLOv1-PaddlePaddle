@@ -78,14 +78,6 @@ if __name__ == '__main__':
     # net = net.to(device)
     
     # evaluation
-    # evaluator = VOCAPIEvaluator(data_root=VOC_ROOT,
-    #                         img_size=input_size,
-    #                         device=device,
-    #                         transform=BaseTransform(input_size),
-    #                         labelmap=VOC_CLASSES,
-    #                         display=True
-    #                         )
-    # evaluator.evaluate(net)
     with paddle.no_grad():
         if args.dataset == 'voc':
             voc_test(net, device, input_size)
