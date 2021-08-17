@@ -63,7 +63,8 @@ python test.py
 python eval.py
 ```
 
-## repo
+##  reference
+
 https://github.com/AlexeyAB/darknet
 
 https://github.com/TowardsNorth/yolo_v1_tensorflow_guiyu
