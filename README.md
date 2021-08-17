@@ -63,4 +63,10 @@ python test.py
 python eval.py
 ```
 
+## repo
+https://github.com/AlexeyAB/darknet
+https://github.com/TowardsNorth/yolo_v1_tensorflow_guiyu
+https://github.com/yjh0410/new-YOLOv1_PyTorch
+https://github.com/abeardear/pytorch-YOLO-v1
+
 
