@@ -116,24 +116,25 @@ def loss(pred_conf, pred_cls, pred_txtytwth, label):
 
     
     # class loss
-
     pred_cls=pred_cls.astype('float32')
     gt_cls=gt_cls.astype('int64')
 
     pred_cls_t=paddle.fluid.layers.transpose(pred_cls,perm=[0,2,1])
 
     cls_loss_total=paddle.zeros(shape=[0])
-    for i in range(32):
-        for j in range(169):
+    for i in range(pred_cls_t.shape[0]):
+        for j in range(pred_cls_t.shape[1]):
             cls_loss_total=paddle.concat(x=[cls_loss_total,cls_loss_function(pred_cls_t[i][j],gt_cls[i][j])],axis=0)
     cls_loss_total=paddle.to_tensor(cls_loss_total,stop_gradient=False)
-    cls_loss_total=paddle.reshape(cls_loss_total,shape=[32,169])
+    cls_loss_total=paddle.reshape(cls_loss_total,shape=[pred_cls_t.shape[0],pred_cls_t.shape[1]])
 
     temp_result=cls_loss_total * gt_obj
     temp_result=paddle.to_tensor(temp_result,stop_gradient=False).astype('float32')
 
     
     cls_loss = paddle.mean(paddle.sum(temp_result, 1))
+
+
 
 
     
