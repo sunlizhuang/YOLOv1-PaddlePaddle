@@ -10,18 +10,15 @@
 # 二、YOLOv1模型的设计
 整体来看，Yolo算法采用一个单独的CNN模型实现end-to-end的目标检测，整个系统如图示：首先将输入图片resize到448x448，然后送入CNN网络，最后处理网络预测结果得到检测的目标。相比R-CNN算法，其是一个统一的框架，其速度更快，而且Yolo的训练过程也是end-to-end的。
 
-![](https://ai-studio-static-online.cdn.bcebos.com/37cace4cc804425bae29ec5ec4372014902800ff5b39494489495b9646213d23)
-
+![](./1.png)
 
 具体来说，Yolo的CNN网络将输入的图片分割成，其中前4个表征边界框的大小与位置，而最后一个值是置信度。
 
-![](https://ai-studio-static-online.cdn.bcebos.com/722d1fa70c0844939128391fccbcbb96acc1f406c1cd453f9396120766056e3b)
-
+![](./2.png)
 
 还有分类问题，对于每一个单元格其还要给出预测出。边界框类别置信度表征的是该边界框中目标属于各个类别的可能性大小以及边界框匹配目标的好坏。后面会说，一般会根据类别置信度来过滤网络的预测框。
 
-![](https://ai-studio-static-online.cdn.bcebos.com/be2eea49cbad4009932619cbea6c2764ed515464293643a1988ebad15f3f689c)
-
+![](./3.png)
 
 ```
 
@@ -38,7 +35,7 @@
 
 Yolo采用卷积网络来提取特征，然后使用全连接层来得到预测值。网络结构参考GooLeNet模型，包含24个卷积层和2个全连接层，如图8所示。对于卷积层，主要使用1x1卷积来做channle reduction，然后紧跟3x3卷积。对于卷积层和全连接层，采用Leaky ReLU激活函数：。但是最后一层却采用线性激活函数。除了上面这个结构，文章还提出了一个轻量级版本Fast Yolo，其仅使用9个卷积层，并且卷积层中使用更少的卷积核。
 
-![](https://ai-studio-static-online.cdn.bcebos.com/a668b84427ae48bbb61cf401d8d4c3fe1b5066e6f5fb4d13b92268c472c028c8)
+![](./4.png)
 
 ## 具体实现
 
@@ -257,7 +254,7 @@ class ResNet(nn.Layer):
 
 可以看到网络的最后输出为是边界框的预测结果。这样，提取每个部分是非常方便的，这会方面后面的训练及预测时的计算。
 
-![](https://ai-studio-static-online.cdn.bcebos.com/bdd04d80c17648718eeeb5247f58a93c41ce9f4e744f4742ae25652b2334d444)
+![](./5.png)
 
 ## 具体实现
 
@@ -316,14 +313,13 @@ class ResNet(nn.Layer):
 # 四、训练与损失函数
 在训练之前，先在ImageNet上进行了预训练，其预训练的分类模型采用图8中前20个卷积层，然后添加一个average-pool层和全连接层。预训练之后，在预训练得到的20层卷积层之上加上随机初始化的4个卷积层和2个全连接层。由于检测任务一般需要更高清的图片，所以将网络的输入从224x224增加到了448x448。整个网络的流程如下图所示：
 
-![](https://ai-studio-static-online.cdn.bcebos.com/33430550a83f4b3da031485875f6bc530ec175b895f647cbb49dd74b0173b475)
-
+![](./6.png)
 
 下面是训练损失函数的分析，Yolo算法将目标检测看成回归问题，所以采用的是均方差损失函数。但是对不同的部分采用了不同的权重值。首先区分定位误差和分类误差。对于定位误差，即边界框坐标预测误差，采用较大的权重。
 另外一点时，由于每个单元格预测多个边界框。但是其对应类别只有一个。那么在训练时，如果该单元格内确实存在目标，那么只选择与ground truth的IOU最大的那个边界框来负责预测该目标，而其它边界框认为不存在目标。这样设置的一个结果将会使一个单元格对应的边界框更加专业化，其可以分别适用不同大小，不同高宽比的目标，从而提升模型性能。大家可能会想如果一个单元格内存在多个目标怎么办，其实这时候Yolo算法就只能选择其中一个来训练，这也是Yolo算法的缺点之一。要注意的一点时，对于不存在对应目标的边界框，其误差项就是只有置信度，左标项误差是没法计算的。而只有当一个单元格内确实存在目标时，才计算分类误差项，否则该项也是无法计算的。
 综上讨论，最终的损失函数计算如下：
 
-![](https://ai-studio-static-online.cdn.bcebos.com/b6f9632abada456fa85e7ebd9b868cce7dce00914eef41548edc24b260ffa8e7)
+![](./7.png)
 
 
 其中第一项是边界框中心坐标的误差项，个单元格存在目标。
@@ -368,17 +364,18 @@ def loss(pred_conf, pred_cls, pred_txtytwth, label):
     pred_cls_t=paddle.fluid.layers.transpose(pred_cls,perm=[0,2,1])
 
     cls_loss_total=paddle.zeros(shape=[0])
-    for i in range(32):
-        for j in range(169):
+    for i in range(pred_cls_t.shape[0]):
+        for j in range(pred_cls_t.shape[1]):
             cls_loss_total=paddle.concat(x=[cls_loss_total,cls_loss_function(pred_cls_t[i][j],gt_cls[i][j])],axis=0)
     cls_loss_total=paddle.to_tensor(cls_loss_total,stop_gradient=False)
-    cls_loss_total=paddle.reshape(cls_loss_total,shape=[32,169])
+    cls_loss_total=paddle.reshape(cls_loss_total,shape=[pred_cls_t.shape[0],pred_cls_t.shape[1]])
 
     temp_result=cls_loss_total * gt_obj
     temp_result=paddle.to_tensor(temp_result,stop_gradient=False).astype('float32')
 
     
     cls_loss = paddle.mean(paddle.sum(temp_result, 1))
+
 
 
     
