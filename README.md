@@ -1,4 +1,4 @@
-# 基于PaddlePaddle框架的YOLOv1复现
+# 《基于PaddlePaddle框架的YOLOv1复现》
 
 论文名称：You only look once unified real-time object detection
 
